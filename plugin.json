@@ -4,7 +4,7 @@
     "Name": "Free Dictionary",
     "Description": "Lookup words' definition and pronunciation with playable audio using Free Dictionary",
     "Author": "tenmo2003",
-    "Version": "1.0.1",
+    "Version": "1.0.2",
     "Language": "csharp",
     "Website": "https://github.com/tenmo2003/Flow.Launcher.Plugin.FreeDictionary",
     "IcoPath": "icon.png",
