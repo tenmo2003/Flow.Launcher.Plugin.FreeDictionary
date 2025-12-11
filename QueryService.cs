@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Media;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using NAudio.Wave;
 
@@ -23,6 +24,8 @@ namespace Flow.Launcher.Plugin.FreeDictionary
         private const int lengthThreshold = 60;
 
         private const string Url = "https://api.dictionaryapi.dev/api/v2/entries/en/{0}";
+
+        private string currentAudioUrl;
 
         public async Task<List<Result>> Query(string query, IPublicAPI publicAPI)
         {
@@ -74,12 +77,15 @@ namespace Flow.Launcher.Plugin.FreeDictionary
                     Title = phonetic,
                     SubTitle = "Phonetic " + (string.IsNullOrEmpty(audioURL) ? "(No audio)" : "(Select to play audio if available)"),
                     IcoPath = iconPath,
+                    Action = (c) =>
+                    {
+                        PlayAudio(audioURL);
+                        return false;
+                    }
                 };
 
                 results.Add(result);
             }
-
-            _ = FetchPronunciationAudio(audioURL, results);
 
             foreach (var meaning in mainResult.Meanings)
             {
@@ -105,9 +111,9 @@ namespace Flow.Launcher.Plugin.FreeDictionary
             return results;
         }
 
-        private async Task FetchPronunciationAudio(string audioURL, List<Result> results)
+        private async void PlayAudio(string audioURL)
         {
-            if (!string.IsNullOrEmpty(audioURL))
+            if (!string.IsNullOrEmpty(audioURL) && audioURL != currentAudioUrl)
             {
                 waveOut?.Stop();
                 waveOut?.Dispose();
@@ -122,28 +128,17 @@ namespace Flow.Launcher.Plugin.FreeDictionary
                 waveOut = new WaveOut();
                 waveOut.Init(reader);
 
-                if (results.Count > 0)
-                {
-                    results[0].Action = (c) =>
-                    {
-                        reader.Seek(0, SeekOrigin.Begin);
-                        waveOut.Play();
-
-                        return false;
-                    };
-                }
+                currentAudioUrl = audioURL;
             }
+
+            reader.Seek(0, SeekOrigin.Begin);
+            waveOut.Play();
         }
 
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
             httpClient.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }
