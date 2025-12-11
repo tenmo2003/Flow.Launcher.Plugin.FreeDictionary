@@ -75,7 +75,7 @@ namespace Flow.Launcher.Plugin.FreeDictionary
                 var result = new Result
                 {
                     Title = phonetic,
-                    SubTitle = "Phonetic " + (string.IsNullOrEmpty(audioURL) ? "(No audio)" : "(Select to play audio if available)"),
+                    SubTitle = "Phonetic " + (string.IsNullOrEmpty(audioURL) ? "(No audio)" : "(Select to play audio)"),
                     IcoPath = iconPath,
                     Action = (c) =>
                     {
@@ -113,7 +113,11 @@ namespace Flow.Launcher.Plugin.FreeDictionary
 
         private async void PlayAudio(string audioURL)
         {
-            if (!string.IsNullOrEmpty(audioURL) && audioURL != currentAudioUrl)
+            if (string.IsNullOrEmpty(audioURL))
+            {
+                return;
+            }
+            if (audioURL != currentAudioUrl)
             {
                 waveOut?.Stop();
                 waveOut?.Dispose();
